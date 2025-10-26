@@ -1,0 +1,18 @@
+
+[
+  { "id_jabatan": "J001", "nama_jabatan": "Kepala Dinas Pendidikan", "dinas": "Pendidikan", "required_skill": ["Manajemen Strategis", "Kebijakan Publik", "Anggaran", "Leadership"], "level": "Eselon 2" },
+  { "id_jabatan": "J002", "nama_jabatan": "Kepala Dinas Kesehatan", "dinas": "Kesehatan", "required_skill": ["Manajemen Kesehatan", "Kebijakan Publik", "Kesehatan Masyarakat", "Leadership"], "level": "Eselon 2" },
+  { "id_jabatan": "J003", "nama_jabatan": "Kepala Dinas Kominfo", "dinas": "Kominfo", "required_skill": ["Manajemen IT", "Kebijakan Digital", "Keamanan Siber", "Leadership"], "level": "Eselon 2" },
+  { "id_jabatan": "J004", "nama_jabatan": "Kepala Badan Kepegawaian Daerah", "dinas": "BKD", "required_skill": ["Manajemen SDM", "Hukum Ketenagakerjaan", "Leadership", "Analisis Organisasi"], "level": "Eselon 2" },
+  { "id_jabatan": "J005", "nama_jabatan": "Kepala Badan Pengelola Keuangan", "dinas": "Keuangan", "required_skill": ["Manajemen Keuangan", "Akuntansi Pemerintah", "Anggaran", "Audit"], "level": "Eselon 2" },
+  { "id_jabatan": "J006", "nama_jabatan": "Sekretaris Dinas Pendidikan", "dinas": "Pendidikan", "required_skill": ["Manajemen Administrasi", "Kurikulum", "Manajemen Proyek"], "level": "Eselon 3" },
+  { "id_jabatan": "J007", "nama_jabatan": "Kepala Bidang Pencegahan Penyakit", "dinas": "Kesehatan", "required_skill": ["Epidemiologi", "Manajemen Program", "Promosi Kesehatan"], "level": "Eselon 3" },
+  { "id_jabatan": "J008", "nama_jabatan": "Kepala Bidang e-Government", "dinas": "Kominfo", "required_skill": ["Pengembangan Sistem", "Manajemen Proyek", "Analisis Data"], "level": "Eselon 3" },
+  { "id_jabatan": "J009", "nama_jabatan": "Kepala Bidang Mutasi & Promosi", "dinas": "BKD", "required_skill": ["Manajemen Talenta", "Asesmen Kompetensi", "Hukum Kepegawaian"], "level": "Eselon 3" },
+  { "id_jabatan": "J010", "nama_jabatan": "Kepala Bidang Anggaran", "dinas": "Keuangan", "required_skill": ["Analisis Anggaran", "Perencanaan Keuangan", "Akuntansi"], "level": "Eselon 3" },
+  { "id_jabatan": "J011", "nama_jabatan": "Inspektur Daerah", "dinas": "Inspektorat", "required_skill": ["Audit Investigatif", "Manajemen Risiko", "Hukum", "Leadership"], "level": "Eselon 2" },
+  { "id_jabatan": "J012", "nama_jabatan": "Kepala Dinas Pekerjaan Umum", "dinas": "Pekerjaan Umum", "required_skill": ["Teknik Sipil", "Manajemen Konstruksi", "Pengadaan Barang dan Jasa", "Leadership"], "level": "Eselon 2" },
+  { "id_jabatan": "J013", "nama_jabatan": "Kepala Badan Perencanaan Pembangunan", "dinas": "Bappeda", "required_skill": ["Perencanaan Pembangunan", "Analisis Kebijakan", "Statistik", "Manajemen Strategis"], "level": "Eselon 2" },
+  { "id_jabatan": "J014", "nama_jabatan": "Kepala Bidang Bina Marga", "dinas": "Pekerjaan Umum", "required_skill": ["Perencanaan Jalan", "Manajemen Proyek", "Teknik Sipil"], "level": "Eselon 3" },
+  { "id_jabatan": "J015", "nama_jabatan": "Kepala Bidang Perencanaan Ekonomi", "dinas": "Bappeda", "required_skill": ["Ekonomi Pembangunan", "Analisis Fiskal", "Penelitian"], "level": "Eselon 3" }
+]
