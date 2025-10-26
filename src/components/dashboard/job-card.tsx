@@ -14,26 +14,41 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Progress } from '../ui/progress';
-import { Badge } from '../ui/badge';
+import RadarChartComponent from './radar-chart';
+import { useMemo } from 'react';
+import { getJobById } from '@/lib/data';
+
 
 interface JobCardProps {
   prospect: AIFlowRecommendation;
 }
 
 export default function JobCard({ prospect }: JobCardProps) {
-  const { jobName, compatibilityScore, explanation } = prospect;
-  // We don't have all job details here, so we extract what we can from the name or leave it.
-  // This is a limitation of the current AI flow output.
-  const jobDetails = prospect.jobName.split(' - ');
-  const title = jobDetails[0];
-  const department = jobDetails.length > 1 ? jobDetails[1] : '';
+  const { jobId, jobName, compatibilityScore, explanation } = prospect;
+  const jobDetails = getJobById(jobId);
+
+  const title = jobDetails?.nama_jabatan || jobName;
+  const department = jobDetails?.dinas || '';
 
   const getScoreColor = (value: number) => {
     if (value >= 90) return 'bg-green-600';
     if (value >= 75) return 'bg-blue-600';
     if (value >= 60) return 'bg-yellow-500';
     return 'bg-red-600';
-  }
+  };
+  
+  const radarData = useMemo(() => {
+    if (!jobDetails) return [];
+    
+    const levelMapping = { 'Eselon 2': 100, 'Eselon 3': 75 };
+    const skillCount = jobDetails.required_skill.length;
+
+    return [
+        { subject: 'Kompatibilitas', value: compatibilityScore },
+        { subject: 'Level', value: levelMapping[jobDetails.level] || 50 },
+        { subject: 'Skill', value: Math.min((skillCount / 5) * 100, 100) }, // Normalize skill count
+    ];
+  }, [jobDetails, compatibilityScore]);
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
@@ -43,13 +58,27 @@ export default function JobCard({ prospect }: JobCardProps) {
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between space-y-4">
         <div>
-            <div className="mb-2 flex justify-between text-sm">
-                <span className="font-medium text-muted-foreground">
-                Skor Kompatibilitas
-                </span>
-                <span className="font-bold text-foreground">{compatibilityScore}%</span>
-            </div>
-            <Progress value={compatibilityScore} className="h-3" style={{ '--tw-bg-opacity': 1, backgroundColor: getScoreColor(compatibilityScore) } as React.CSSProperties} />
+          <div className='mb-4'>
+            <RadarChartComponent data={radarData} />
+          </div>
+          <div className="mb-2 flex justify-between text-sm">
+            <span className="font-medium text-muted-foreground">
+              Skor Kompatibilitas
+            </span>
+            <span className="font-bold text-foreground">
+              {compatibilityScore}%
+            </span>
+          </div>
+          <Progress
+            value={compatibilityScore}
+            className="h-3"
+            style={
+              {
+                '--tw-bg-opacity': 1,
+                backgroundColor: getScoreColor(compatibilityScore),
+              } as React.CSSProperties
+            }
+          />
         </div>
         <Accordion type="single" collapsible>
           <AccordionItem value="explanation" className="border-t pt-2">
