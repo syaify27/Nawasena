@@ -14,46 +14,84 @@ import type {
   AIFlowRecommendation,
 } from '@/lib/types';
 
-// Helper function to calculate a simple compatibility score
-const calculateManualScore = (employee: Employee, job: Job): number => {
-  // 1. Skill Match Score (40%)
-  const requiredSkills = new Set(job.required_skill.map(s => s.toLowerCase()));
-  const employeeSkills = new Set(employee.skill.map(s => s.toLowerCase()));
-  const matchingSkills = [...employeeSkills].filter(skill => requiredSkills.has(skill));
-  const skillScore = requiredSkills.size > 0 ? (matchingSkills.length / requiredSkills.size) * 100 : 100;
+// --- Cosine Similarity Calculation ---
 
-  // 2. Core Competencies Score (30%)
-  const competencies = [
-    employee.leadership,
-    employee.analyticalThinking,
-    employee.publicService,
-    employee.digitalLiteracy,
-    employee.collaboration,
-    employee.integrity,
-  ];
-  const competencyScore = competencies.reduce((a, b) => a + b, 0) / competencies.length;
+function createVector(
+  item: Employee | Job,
+  allSkills: Set<string>
+): Record<string, number> {
+  const vector: Record<string, number> = {};
+
+  // Normalize experience and education for both
+  if ('pengalaman_tahun' in item) {
+    vector['pengalaman'] = Math.min(item.pengalaman_tahun / 20, 1) * 100; // Normalized to 0-100 scale
+    const educationScoreMap = { S1: 70, S2: 85, S3: 100 };
+    vector['pendidikan'] = educationScoreMap[item.pendidikan] || 60;
+  }
+
+  // Add employee-specific attributes
+  if ('leadership' in item) {
+    vector['leadership'] = item.leadership;
+    vector['analyticalThinking'] = item.analyticalThinking;
+    vector['publicService'] = item.publicService;
+    vector['digitalLiteracy'] = item.digitalLiteracy;
+    vector['collaboration'] = item.collaboration;
+    vector['integrity'] = item.integrity;
+    vector['kinerja'] = item.skp_skor;
+  }
+
+  // Add skill attributes
+  const itemSkills = new Set(
+    'skill' in item
+      ? item.skill.map((s) => s.toLowerCase())
+      : item.required_skill.map((s) => s.toLowerCase())
+  );
+  allSkills.forEach((skill) => {
+    vector[`skill_${skill}`] = itemSkills.has(skill) ? 100 : 0; // Use 100 to give skills significant weight
+  });
+
+  // For jobs, we can add placeholder values for competencies if we want to model ideal levels
+  if (!('leadership' in item)) {
+    const levelMultiplier = item.level === 'Eselon 2' ? 1.0 : 0.8;
+    vector['leadership'] = 90 * levelMultiplier;
+    vector['analyticalThinking'] = 85 * levelMultiplier;
+    vector['publicService'] = 85 * levelMultiplier;
+    vector['digitalLiteracy'] = 80 * levelMultiplier;
+    vector['collaboration'] = 85 * levelMultiplier;
+    vector['integrity'] = 90 * levelMultiplier;
+    vector['kinerja'] = 90; // Expected performance level
+  }
+
+  return vector;
+}
+
+function cosineSimilarity(vecA: Record<string, number>, vecB: Record<string, number>): number {
+    const allKeys = new Set([...Object.keys(vecA), ...Object.keys(vecB)]);
+    let dotProduct = 0;
+    let magnitudeA = 0;
+    let magnitudeB = 0;
+
+    for (const key of allKeys) {
+        const valA = vecA[key] || 0;
+        const valB = vecB[key] || 0;
+        dotProduct += valA * valB;
+        magnitudeA += valA * valA;
+        magnitudeB += valB * valB;
+    }
+
+    magnitudeA = Math.sqrt(magnitudeA);
+    magnitudeB = Math.sqrt(magnitudeB);
+
+    if (magnitudeA === 0 || magnitudeB === 0) {
+        return 0;
+    }
+
+    const similarity = dotProduct / (magnitudeA * magnitudeB);
+    return Math.round(similarity * 100); // Return as percentage
+}
 
 
-  // 3. Performance Score (SKP) (20%)
-  const performanceScore = employee.skp_skor;
-
-  // 4. Experience & Education Score (10%)
-  const educationScoreMap = { S1: 70, S2: 85, S3: 100 };
-  const educationScore = educationScoreMap[employee.pendidikan] || 60;
-  
-  const experienceScore = Math.min((employee.pengalaman_tahun / 20) * 100, 100); // Capped at 20 years
-
-  const experienceEducationScore = (educationScore + experienceScore) / 2;
-
-  // Weighted average
-  const finalScore =
-    skillScore * 0.4 +
-    competencyScore * 0.3 +
-    performanceScore * 0.2 +
-    experienceEducationScore * 0.1;
-
-  return Math.round(finalScore);
-};
+// --- Main Actions ---
 
 export async function findJobProspects(
   employeeId: string
@@ -82,7 +120,7 @@ export async function findJobProspects(
     };
 
     const result = await generatePositionRecommendation(input);
-    return result.recommendations;
+    return result.recommendations.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
   } catch (error) {
     console.error('Error in findJobProspects:', error);
     return [];
@@ -100,12 +138,20 @@ export async function findCompatibleCandidates(
 
     const allEmployees = getEmployees();
     const allJobs = getJobs();
+    
+    // Create a comprehensive set of all skills across all jobs and employees
+    const allSkills = new Set<string>();
+    allJobs.forEach(job => job.required_skill.forEach(skill => allSkills.add(skill.toLowerCase())));
+    allEmployees.forEach(emp => emp.skill.forEach(skill => allSkills.add(skill.toLowerCase())));
 
-    // 1. Calculate manual score for all employees for the target job
-    const scoredEmployees = allEmployees.map((employee) => ({
-      employee,
-      score: calculateManualScore(employee, targetJob),
-    }));
+    const jobVector = createVector(targetJob, allSkills);
+
+    // 1. Calculate similarity score for all employees for the target job
+    const scoredEmployees = allEmployees.map((employee) => {
+      const employeeVector = createVector(employee, allSkills);
+      const score = cosineSimilarity(employeeVector, jobVector);
+      return { employee, score };
+    });
 
     // 2. Sort by score and take top 5
     const top5Candidates = scoredEmployees
@@ -121,7 +167,7 @@ export async function findCompatibleCandidates(
                 employeeExperienceYears: candidate.employee.pengalaman_tahun,
                 employeeSkpScore: candidate.employee.skp_skor,
                 employeeKinerjaHarianRata: candidate.employee.kinerja_harian_rata,
-                jobList: allJobs.map(job => ({ ...job, id_jabatan: job.id_jabatan }))
+                jobList: [targetJob].map(job => ({ ...job, id_jabatan: job.id_jabatan })) // Only need the target job
             };
             
             try {
@@ -129,7 +175,8 @@ export async function findCompatibleCandidates(
                 const recommendationForTargetJob = aiResult.recommendations.find(rec => rec.jobId === targetJob.id_jabatan);
                 
                 return {
-                    ...candidate,
+                    employee: candidate.employee,
+                    score: candidate.score, // Use our cosine similarity score
                     explanation: recommendationForTargetJob?.explanation || "Penjelasan tidak dapat dibuat oleh AI saat ini."
                 };
             } catch (aiError) {
