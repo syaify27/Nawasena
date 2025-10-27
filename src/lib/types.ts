@@ -9,6 +9,16 @@ export type Employee = {
   kinerja_harian_rata: number;
   dinas: string;
   avatar: string;
+  // New detailed assessment scores
+  leadership: number;
+  analyticalThinking: number;
+  publicService: number;
+  digitalLiteracy: number;
+  collaboration: number;
+  integrity: number;
+  // Placeholders for future AI features
+  talentGrowthPath: string[];
+  recommendedTreatment: string[];
 };
 
 export type Job = {
