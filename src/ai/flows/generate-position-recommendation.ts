@@ -29,11 +29,11 @@ export type GeneratePositionRecommendationInput = z.infer<typeof GeneratePositio
 
 const GeneratePositionRecommendationOutputSchema = z.object({
   recommendations: z.array(z.object({
-    jobId: z.string().describe('The ID of the recommended job.'),
-    jobName: z.string().describe('The name of the recommended job.'),
-    compatibilityScore: z.number().describe('The compatibility score (0-100) for the job.'),
-    explanation: z.string().describe('An AI-generated explanation of why the job is a good fit.'),
-  })).describe('A list of recommended jobs with compatibility scores and explanations.'),
+    jobId: z.string().describe('ID jabatan yang direkomendasikan.'),
+    jobName: z.string().describe('Nama jabatan yang direkomendasikan.'),
+    compatibilityScore: z.number().describe('Skor kompatibilitas (0-100) untuk jabatan tersebut.'),
+    explanation: z.string().describe('Penjelasan yang dihasilkan AI mengapa jabatan ini cocok, dalam Bahasa Indonesia.'),
+  })).describe('Daftar jabatan yang direkomendasikan dengan skor kompatibilitas dan penjelasan.'),
 });
 export type GeneratePositionRecommendationOutput = z.infer<typeof GeneratePositionRecommendationOutputSchema>;
 
@@ -45,20 +45,21 @@ const prompt = ai.definePrompt({
   name: 'generatePositionRecommendationPrompt',
   input: {schema: GeneratePositionRecommendationInputSchema},
   output: {schema: GeneratePositionRecommendationOutputSchema},
-  prompt: `You are an expert HR consultant specializing in government positions in Indonesia. Based on the employee's skills, experience, SKP score, daily performance, and available job positions, recommend the top positions that best fit the employee. Provide a compatibility score (0-100) and explain why each recommended position is a good fit for the employee.
+  prompt: `Anda adalah konsultan SDM ahli yang berspesialisasi dalam jabatan pemerintahan di Indonesia. Berdasarkan data pegawai dan daftar jabatan yang tersedia, berikan rekomendasi jabatan yang paling sesuai. Untuk setiap rekomendasi, berikan skor kompatibilitas (0-100) dan penjelasan singkat dalam Bahasa Indonesia mengapa jabatan tersebut cocok.
 
-Employee ID: {{{employeeId}}}
-Employee Skills: {{#each employeeSkills}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
-Employee Experience (Years): {{{employeeExperienceYears}}}
-Employee SKP Score: {{{employeeSkpScore}}}
-Employee Daily Performance: {{{employeeKinerjaHarianRata}}}
+Data Pegawai:
+- ID Pegawai: {{{employeeId}}}
+- Skill: {{#each employeeSkills}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+- Pengalaman (Tahun): {{{employeeExperienceYears}}}
+- Skor SKP: {{{employeeSkpScore}}}
+- Kinerja Harian Rata-rata: {{{employeeKinerjaHarianRata}}}
 
-Available Job Positions:
+Daftar Jabatan Tersedia:
 {{#each jobList}}
-  - Job ID: {{{id_jabatan}}}, Job Name: {{{nama_jabatan}}}, Department: {{{dinas}}}, Required Skills: {{#each required_skill}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}, Level: {{{level}}}
+  - ID Jabatan: {{{id_jabatan}}}, Nama: {{{nama_jabatan}}}, Dinas: {{{dinas}}}, Skill yang Dibutuhkan: {{#each required_skill}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}, Level: {{{level}}}
 {{/each}}
 
-Format your output as a JSON object with a 'recommendations' array. Each object in the array should include the 'jobId', 'jobName', 'compatibilityScore', and 'explanation' for each recommended job.`, // Changed the Handlebars tags to triple curly braces to allow HTML tags to be rendered. Added the Available Job Positions to the prompt, looping through the jobList array and listing the job details.
+Format output Anda sebagai objek JSON yang valid dengan properti 'recommendations'. Properti 'recommendations' harus berupa array objek, di mana setiap objek berisi 'jobId', 'jobName', 'compatibilityScore', dan 'explanation' (dalam Bahasa Indonesia).`,
 });
 
 const generatePositionRecommendationFlow = ai.defineFlow(

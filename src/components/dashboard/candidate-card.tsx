@@ -45,15 +45,20 @@ export default function CandidateCard({ candidate, rank }: CandidateCardProps) {
   };
 
   const radarData = useMemo(() => {
+    const educationScoreMap = { S1: 70, S2: 85, S3: 100 };
     return [
       { subject: 'Leadership', value: employee.leadership },
       { subject: 'Analytical', value: employee.analyticalThinking },
-      { subject: 'Public Svc', value: employee.publicService },
-      { subject: 'Digital Lit', value: employee.digitalLiteracy },
+      { subject: 'Service', value: employee.publicService },
+      { subject: 'Digital', value: employee.digitalLiteracy },
       { subject: 'Collaboration', value: employee.collaboration },
       { subject: 'Integrity', value: employee.integrity },
+      { subject: 'Performance', value: employee.skp_skor }, // SKP score for performance
+      { subject: 'Experience', value: Math.min((employee.pengalaman_tahun / 20) * 100, 100) }, // Normalized experience
+      { subject: 'Education', value: educationScoreMap[employee.pendidikan] || 60 },
     ];
   }, [employee]);
+
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">

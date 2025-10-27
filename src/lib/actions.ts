@@ -22,11 +22,20 @@ const calculateManualScore = (employee: Employee, job: Job): number => {
   const matchingSkills = [...employeeSkills].filter(skill => requiredSkills.has(skill));
   const skillScore = requiredSkills.size > 0 ? (matchingSkills.length / requiredSkills.size) * 100 : 100;
 
-  // 2. SKP Score (30%)
-  const skpScore = employee.skp_skor;
+  // 2. Core Competencies Score (30%)
+  const competencies = [
+    employee.leadership,
+    employee.analyticalThinking,
+    employee.publicService,
+    employee.digitalLiteracy,
+    employee.collaboration,
+    employee.integrity,
+  ];
+  const competencyScore = competencies.reduce((a, b) => a + b, 0) / competencies.length;
 
-  // 3. Daily Performance Score (20%)
-  const performanceScore = employee.kinerja_harian_rata;
+
+  // 3. Performance Score (SKP) (20%)
+  const performanceScore = employee.skp_skor;
 
   // 4. Experience & Education Score (10%)
   const educationScoreMap = { S1: 70, S2: 85, S3: 100 };
@@ -39,7 +48,7 @@ const calculateManualScore = (employee: Employee, job: Job): number => {
   // Weighted average
   const finalScore =
     skillScore * 0.4 +
-    skpScore * 0.3 +
+    competencyScore * 0.3 +
     performanceScore * 0.2 +
     experienceEducationScore * 0.1;
 
@@ -54,7 +63,7 @@ export async function findJobProspects(
     const jobs = getJobs();
 
     if (!employee) {
-      throw new Error('Employee not found');
+      throw new Error('Pegawai tidak ditemukan');
     }
 
     const input: GeneratePositionRecommendationInput = {
@@ -86,7 +95,7 @@ export async function findCompatibleCandidates(
   try {
     const targetJob = getJobs().find((j) => j.id_jabatan === jobId);
     if (!targetJob) {
-      throw new Error('Job not found');
+      throw new Error('Jabatan tidak ditemukan');
     }
 
     const allEmployees = getEmployees();
