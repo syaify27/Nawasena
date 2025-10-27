@@ -40,13 +40,26 @@ export default function JobCard({ prospect }: JobCardProps) {
   const radarData = useMemo(() => {
     if (!jobDetails) return [];
     
-    const levelMapping = { 'Eselon 2': 100, 'Eselon 3': 75 };
-    const skillCount = jobDetails.required_skill.length;
-
+    // Define ideal competency scores for a job level
+    const levelMultiplier = jobDetails.level === 'Eselon 2' ? 1.0 : 0.8;
+    const idealScores = {
+        leadership: 90 * levelMultiplier,
+        analyticalThinking: 85 * levelMultiplier,
+        publicService: 85 * levelMultiplier,
+        digitalLiteracy: 80 * levelMultiplier,
+        collaboration: 85 * levelMultiplier,
+        integrity: 90 * levelMultiplier,
+    };
+    
+    // We add compatibility score to the radar to show overall fitness
     return [
-        { subject: 'Kompatibilitas', value: compatibilityScore },
-        { subject: 'Level', value: levelMapping[jobDetails.level] || 50 },
-        { subject: 'Skill', value: Math.min((skillCount / 5) * 100, 100) }, // Normalize skill count
+        { subject: 'Compatibility', value: compatibilityScore },
+        { subject: 'Leadership', value: idealScores.leadership },
+        { subject: 'Analytical', value: idealScores.analyticalThinking },
+        { subject: 'Service', value: idealScores.publicService },
+        { subject: 'Digital', value: idealScores.digitalLiteracy },
+        { subject: 'Collaboration', value: idealScores.collaboration },
+        { subject: 'Integrity', value: idealScores.integrity },
     ];
   }, [jobDetails, compatibilityScore]);
 
@@ -71,13 +84,8 @@ export default function JobCard({ prospect }: JobCardProps) {
           </div>
           <Progress
             value={compatibilityScore}
-            className="h-3"
-            style={
-              {
-                '--tw-bg-opacity': 1,
-                backgroundColor: getScoreColor(compatibilityScore),
-              } as React.CSSProperties
-            }
+            className="h-2"
+            indicatorClassName={getScoreColor(compatibilityScore)}
           />
         </div>
         <Accordion type="single" collapsible>
