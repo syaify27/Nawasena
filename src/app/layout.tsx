@@ -3,9 +3,9 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'SIASN MatchUp',
+  title: 'Nawasena',
   description:
-    'Sistem pengukuran kompatibilitas pegawai ASN dengan jabatan struktural.',
+    'Navigasi Talenta dan Wawasan Aparatur untuk Sistem Evaluasi dan Nurturing ASN.',
 };
 
 export default function RootLayout({

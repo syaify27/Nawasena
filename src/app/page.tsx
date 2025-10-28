@@ -11,14 +11,14 @@ export default function Home() {
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur md:px-6">
         <Logo />
         <h1 className="font-headline text-xl font-semibold text-primary md:text-2xl">
-          SIASN MatchUp
+          Nawasena
         </h1>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <DashboardClient employees={employees} jobs={jobs} />
       </main>
       <footer className="flex items-center justify-center p-4 text-sm text-muted-foreground">
-        © {new Date().getFullYear()} SIASN MatchUp. All rights reserved.
+        © {new Date().getFullYear()} Nawasena. All rights reserved.
       </footer>
     </div>
   );
